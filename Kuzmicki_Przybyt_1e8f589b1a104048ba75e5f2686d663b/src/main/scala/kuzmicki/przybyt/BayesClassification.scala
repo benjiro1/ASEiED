@@ -1,6 +1,8 @@
 package kuzmicki.przybyt
 
 import java.awt._
+import java.awt.geom._
+import java.awt.image.BufferedImage
 
 import org.apache.log4j.{Level, Logger}
 import org.apache.spark.sql.SparkSession
@@ -48,6 +50,8 @@ class BayesClassification extends Serializable {
     }
 
     val basePoints = greenPoints ++ redPoints
+
+    drawPoints(basePoints, addedPoints)
   }
 
 
@@ -83,9 +87,37 @@ class BayesClassification extends Serializable {
     }
   }
 
+  def drawPoints(points: ArrayBuffer[Point], added: ArrayBuffer[Point]): Unit = {
+    // Size of image
+    val size = (450, 450)
+    val factor = 10
+    // create an image
+    val canvas = new BufferedImage(size._1, size._2, BufferedImage.TYPE_INT_RGB)
 
+    // get Graphics2D for the image
+    val g = canvas.createGraphics()
+
+    // clear background
+    g.setColor(Color.WHITE)
+    g.fillRect(0, 0, canvas.getWidth, canvas.getHeight)
+
+    //draw all points
+    for (i <- points.indices) {
+      g.setColor(points(i).color)
+      g.fill(new Ellipse2D.Double(points(i).x * factor - 2, points(i).y * factor - 2, 4.0, 4.0))
+    }
+
+    for (i <- added.indices) {
+      g.setColor(added(i).color)
+      g.fill(new Ellipse2D.Double(added(i).x * factor - 6, added(i).y * factor - 6, 12.0, 12.0))
+      g.draw(new Ellipse2D.Double(added(i).x * factor - FIELDSIZE * factor, added(i).y * factor - FIELDSIZE * factor, FIELDSIZE * factor * 2, 2 * FIELDSIZE * factor))
+    }
+
+    javax.imageio.ImageIO.write(canvas, "png", new java.io.File("results.png"))
+  }
 
 }
+
 
 
 
