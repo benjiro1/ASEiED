@@ -3,6 +3,7 @@ package kuzmicki.przybyt
 import java.awt._
 import java.awt.geom._
 import java.awt.image.BufferedImage
+import javax.swing.{ImageIcon, JOptionPane}
 
 import org.apache.log4j.{Level, Logger}
 import org.apache.spark.sql.SparkSession
@@ -15,7 +16,7 @@ class BayesClassification extends Serializable {
 
   val sparkSession = SparkSession.builder.
     master("local")
-    .appName("spark session example")
+    .appName("Bayes Classifier with spark")
     .getOrCreate()
 
   def stopWritingToConsole: Unit = {
@@ -27,13 +28,13 @@ class BayesClassification extends Serializable {
     stopWritingToConsole // method without parenthesis because I defined it earlier without any parameters
     val path = "./src/main/resources/data.json"
     val data = sparkSession.read.json(sparkSession.sparkContext.wholeTextFiles(path).values)
-    var wrapped= data.head().getList(1) // get point values from json
-    var newWrap  = wrapped.toArray // convert wrappedarray of wrappedarrays to array of wrappedarrays
+    val wrapped2dArray = data.head().getList(1) // get point values from json
+    val halfWrapped2dArray = wrapped2dArray.toArray // convert wrappedarray of wrappedarrays to array of wrappedarrays
     var greenPoints: ArrayBuffer[Point] = new ArrayBuffer[Point]()
     var redPoints: ArrayBuffer[Point] = new ArrayBuffer[Point]()
-    for(i <- newWrap.indices){
-      var wrappedOneJsonRow:Seq[Long]  = newWrap(i).asInstanceOf[Seq[Long] ]
-      var oneJsonRow = wrappedOneJsonRow.toArray // convert array of wrappedarrays to array of array with Longs
+    for (i <- halfWrapped2dArray.indices) {
+      val wrappedOneJsonRow: Seq[Long] = halfWrapped2dArray(i).asInstanceOf[Seq[Long]]
+      val oneJsonRow = wrappedOneJsonRow.toArray // convert array of wrappedarrays to array of array with Longs
       var greenPoint = new Point(oneJsonRow(0), oneJsonRow(1), Color.GREEN)
       var redPoint = new Point(oneJsonRow(2), oneJsonRow(3), Color.RED)
 
@@ -50,10 +51,9 @@ class BayesClassification extends Serializable {
     }
 
     val basePoints = greenPoints ++ redPoints
-
     drawPoints(basePoints, addedPoints)
+    showResult
   }
-
 
   def BayesClassificator(greenPoints: ArrayBuffer[Point], redPoints: ArrayBuffer[Point], point: Point): Unit = {
     val greenRDD = sparkSession.sparkContext.parallelize(greenPoints)
@@ -116,8 +116,20 @@ class BayesClassification extends Serializable {
     javax.imageio.ImageIO.write(canvas, "png", new java.io.File("results.png"))
   }
 
+  def showResult: Unit = {
+    import java.awt.BorderLayout
+    import javax.swing.{JFrame, JLabel}
+    JFrame.setDefaultLookAndFeelDecorated(true)
+
+    val frame: JFrame = new JFrame
+    frame.setLayout(new BorderLayout)
+    frame.setTitle("Bayes Classification Results")
+    val img = new ImageIcon("results.png")
+
+    val label: JLabel = new JLabel(img)
+    frame.add(label)
+    frame.pack()
+    frame.setVisible(true)
+    JOptionPane.showMessageDialog(frame, "Press \'OK\' to close program") // without this frame closes immediately
+  }
 }
-
-
-
-

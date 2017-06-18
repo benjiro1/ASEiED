@@ -5,9 +5,8 @@ import org.scalatest.{FunSpec, GivenWhenThen}
 
 class BayesClassificationTest extends FunSpec with GivenWhenThen {
 
-  describe("JoinJobTest") {
+  describe("BayesClassificationTest") {
     var bayesTest = new BayesClassification()
     bayesTest.classify
   }
-
 }
