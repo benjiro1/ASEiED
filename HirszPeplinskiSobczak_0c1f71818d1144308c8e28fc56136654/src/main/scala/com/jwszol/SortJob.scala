@@ -17,24 +17,26 @@ class SortJob {
     .getOrCreate()
 
 
-  def joinData: Unit = {
+  def prepareData: Unit = {
     Logger.getLogger("org").setLevel(Level.OFF)
     Logger.getLogger("akka").setLevel(Level.OFF)
 
     val jsonRDD = sparkSession.sparkContext.wholeTextFiles("./src/main/resources/dataMay-31-2017.json").map(x => x._2)
     //jsonRDD.collect().foreach(println)
     val readedJsonRDD = sparkSession.read.json(jsonRDD)
-    readedJsonRDD.collect().foreach(println)
+    readedJsonRDD.collect()
     //val parsedArray = readedJsonRDD.map(x => x._2)
     val explodeJson = readedJsonRDD.withColumn("data", explode(readedJsonRDD.col("data"))).select("data")
-    explodeJson.show()
+  //  explodeJson.show()
     explodeJson.createOrReplaceTempView("tab")
+  }
 
+  def selectiveSort: Unit = {
     val values_with_ids = sparkSession.sql("SELECT cast(data[0] as integer) as id, cast(data[1] as float) as value FROM tab")
     values_with_ids.createOrReplaceTempView("source_table")
 
     val table = sparkSession.sql("SELECT cast(data[0] as integer) as id, cast(data[1] as float) as value FROM tab")
-    table.show()
+    //   table.show()
     val data_length = values_with_ids.count().toInt
 
     var sorted_list : List[(Any,Any)] = List()
@@ -45,12 +47,11 @@ class SortJob {
       val curr_row = sparkSession.sql("SELECT * FROM source_table ORDER BY value").limit(i).collect()(i-1)
       sorted_list = sorted_list:+((curr_row(0),curr_row(1)))
     }
-    sorted_list.foreach(println)
+   // sorted_list.foreach(println)
 
     val t1 = System.currentTimeMillis()
     println("Selection sort time: " + (t1 - t0) + " ms")
   }
-
 
   def quickSortAll: Unit = {
     val start = System.currentTimeMillis()
@@ -66,12 +67,7 @@ class SortJob {
       obj.value = result(a)
       array += obj
     }
-    quickSort(array)
-//    println("id|value")
-//    for(l <- array)
-//    {
-//      println(l.id + "|" + l.value)
-//    }
+    quickSortPart(array)
     val stop = System.currentTimeMillis()
     println("Quick sort finished. Time: " + (stop - start) + " ms")
   }
@@ -81,7 +77,7 @@ class SortJob {
     var value = 0.0
   }
 
-  def quickSort(xTemp: ArrayBuffer[dataClass]) {
+  def quickSortPart(xTemp: ArrayBuffer[dataClass]) {
     def swapInArray(i: Int, j: Int) {
       val t = xTemp(i)
       xTemp(i) = xTemp(j)
@@ -105,7 +101,6 @@ class SortJob {
     }
     sorting(0, xTemp.length - 1)
   }
-
 
 }
 
