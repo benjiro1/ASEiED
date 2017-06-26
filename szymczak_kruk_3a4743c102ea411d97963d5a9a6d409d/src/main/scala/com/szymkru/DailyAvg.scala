@@ -12,7 +12,7 @@ class DailyAvg {
 
   def avg: Unit = {
     val daily_info = sparkSession.read.option("delimiter", ",").option("header", "true").csv("./src/main/resources/199607daily.txt")
-
+    daily_info.select("Avg Temp").show()
     daily_info.printSchema()
   }
 
