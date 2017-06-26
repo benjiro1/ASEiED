@@ -6,7 +6,7 @@ class DailyAvgTest extends FunSpec with GivenWhenThen {
 
   describe("DailyAvg") {
     val da = new DailyAvg
-    da.avg
+    da.daily
   }
 
 }
