@@ -1,7 +1,8 @@
 package com.szymkru
 
-import org.apache.spark.sql.{Dataset, SparkSession}
+import org.apache.
 
+spark.sql.{Dataset, SparkSession}
 
 class DailyAvg {
 
@@ -11,9 +12,10 @@ class DailyAvg {
     .getOrCreate()
 
   def avg: Unit = {
-    val daily_info = sparkSession.read.option("delimiter", ",").option("header", "true").csv("./src/main/resources/199607daily.txt")
-    daily_info.select("Avg Temp").show()
-    daily_info.printSchema()
+    val di = sparkSession.read.option("delimiter", ",").option("header", "true").csv("./src/main/resources/199607daily.txt")
+    di.printSchema()
+
+    di.select(" Avg Temp"," Wind Avg Speed").show()
   }
 
 }
