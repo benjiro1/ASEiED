@@ -8,7 +8,9 @@ class SortJobTest extends FunSpec with GivenWhenThen {
 
   describe("JoinJobTest") {
     val jj = new SortJob
-    jj.joinData
+    jj.prepareData
+    jj.quickSortAll
+    jj.selectiveSort
   }
 
 }
