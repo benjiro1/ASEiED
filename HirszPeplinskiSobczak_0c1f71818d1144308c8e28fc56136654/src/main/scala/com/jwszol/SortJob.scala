@@ -5,6 +5,11 @@ import org.apache.spark.sql.{Dataset, SparkSession}
 import org.apache.spark.sql.functions.{col, explode}
 import scala.collection.mutable.ArrayBuffer
 //import java.io._
+import java.io._
+import org.json4s.JsonAST.JObject
+
+
+
 
 /**
   * Created by jwszol on 11/06/17.
@@ -51,6 +56,14 @@ class SortJob {
 
     val t1 = System.currentTimeMillis()
     println("Selection sort time: " + (t1 - t0) + " ms")
+
+    val file = "SelectionSort.csv"
+    val writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file)))
+    for (x <- sorted_list) {
+      writer.write(x + "\n")
+    }
+    writer.close()
+
   }
 
   def quickSortAll: Unit = {
