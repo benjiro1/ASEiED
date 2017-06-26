@@ -3,6 +3,10 @@ package com.jwszol
 import org.apache.log4j.{Level, Logger}
 import org.apache.spark.sql.{Dataset, SparkSession}
 import org.apache.spark.sql.functions.{col, explode}
+import java.io._
+import org.json4s.JsonAST.JObject
+
+
 
 
 /**
@@ -43,9 +47,19 @@ class SortJob {
       sorted_list = sorted_list:+((curr_row(0),curr_row(1)))
     }
     sorted_list.foreach(println)
+
+
     
     val t1 = System.currentTimeMillis()
     println("Selection sort time: " + (t1 - t0) + " ms")
+
+    val file = "SelectionSort.csv"
+    val writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file)))
+    for (x <- sorted_list) {
+      writer.write(x + "\n")
+    }
+    writer.close()
+
   }
 
 }
