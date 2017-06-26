@@ -1,8 +1,8 @@
 package com.szymkru
 
-import org.apache.
-
-spark.sql.{Dataset, SparkSession}
+import org.apache.spark.sql.{Dataset, SparkSession}
+import org.apache.spark.sql.functions.col
+import org.apache.spark.sql.types.DoubleType
 
 class DailyAvg {
 
@@ -13,9 +13,21 @@ class DailyAvg {
 
   def avg: Unit = {
     val di = sparkSession.read.option("delimiter", ",").option("header", "true").csv("./src/main/resources/199607daily.txt")
-    di.printSchema()
+    val st = sparkSession.read.option("delimiter", "|").option("header", "true").csv("./src/main/resources/station.txt")
+    val stn = st.select("WBAN Number", "Name")
 
-    di.select(" Avg Temp"," Wind Avg Speed").show()
+    val imp = di.select(di("Wban Number").as("WBAN Number"),
+      di(" Avg Temp").cast(DoubleType).as("Temp"),
+      di(" Wind Avg Speed").cast(DoubleType).as("Wind"))//.join(stn,"Wban Number")
+
+    val avg = imp.groupBy("Wban Number").avg("Temp", "Wind")
+//
+//    imp.printSchema()
+//    imp.show(100)
+
+
+
+
   }
 
 }
