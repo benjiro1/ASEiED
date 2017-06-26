@@ -31,18 +31,15 @@ class SortJob {
     
     val values_with_ids = sparkSession.sql("SELECT cast(data[0] as integer) as id, cast(data[1] as float) as value FROM tab")
     values_with_ids.createOrReplaceTempView("source_table")
-    //values_with_ids.collect().foreach(println)
-    val len = values_with_ids.count().toInt
-    //val arr3 = arr2.collect()
-    val min_val_row = sparkSession.sql("SELECT * FROM source_table WHERE value=(SELECT MIN(value) FROM source_table)").collect()(0)
 
-    var sorted_list : List[(Any,Any)] = List()
-    sorted_list = sorted_list:+((min_val_row(0),min_val_row(1)))    
+    val data_length = values_with_ids.count().toInt
     
-    //sparkSession.sql("SELECT * FROM source_table ORDER BY value").collect.foreach(println)
+    var sorted_list : List[(Any,Any)] = List()
+
     val t0 = System.currentTimeMillis()
-    for(i <- 2 until (len + 1)) {
-      val curr_row = sparkSession.sql("SELECT * FROM source_table ORDER BY value").collect()(i-1)
+    
+    for(i <- 1 until (data_length + 1)) {
+      val curr_row = sparkSession.sql("SELECT * FROM source_table ORDER BY value").limit(i).collect()(i-1)
       sorted_list = sorted_list:+((curr_row(0),curr_row(1)))
     }
     sorted_list.foreach(println)
