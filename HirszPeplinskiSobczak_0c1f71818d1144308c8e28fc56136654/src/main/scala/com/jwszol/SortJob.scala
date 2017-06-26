@@ -4,11 +4,7 @@ import org.apache.log4j.{Level, Logger}
 import org.apache.spark.sql.{Dataset, SparkSession}
 import org.apache.spark.sql.functions.{col, explode}
 import scala.collection.mutable.ArrayBuffer
-//import java.io._
 import java.io._
-import org.json4s.JsonAST.JObject
-
-
 
 
 /**
@@ -83,6 +79,13 @@ class SortJob {
     quickSortPart(array)
     val stop = System.currentTimeMillis()
     println("Quick sort finished. Time: " + (stop - start) + " ms")
+
+    val file = "QuickSort.csv"
+    val writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file)))
+    for (x <- array) {
+      writer.write(x.id + "|" + x.value + "\n")
+    }
+    writer.close()
   }
 
   class dataClass{
